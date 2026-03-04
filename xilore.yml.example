@@ -1,0 +1,37 @@
+# log:
+#   path: "."
+#   file_prefix: "app"
+#   date_format: "yyyy-MM-dd HH:mm:ss.SSS"
+#   detail:
+#     trace:
+#       print: true
+#       write: false
+#       upload: false
+#     debug:
+#       print: true
+#       write: false
+#       upload: false
+#     info:
+#       print: true
+#       write: false
+#       upload: false
+#     warn:
+#       print: true
+#       write: true
+#       upload: false
+#     error:
+#       print: true
+#       write: true
+#       upload: true
+#   upload:
+#     host: ""
+#     token: ""
+#   charset: "UTF-8"
+#   app_name: "my-app"
+#   color: true
+#   compress_width: true
+#   exclude:
+#     - pattern: "com.third.party"
+#       levels:
+#         - "debug"
+#         - "info"
