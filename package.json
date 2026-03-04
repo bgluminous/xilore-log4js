@@ -1,6 +1,6 @@
 {
   "name": "xilore-log4js",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "轻量级 TypeScript/Node 日志库，控制台/文件/上传三种输出，支持 JSON/YAML 配置",
   "type": "module",
   "main": "dist/index.js",
@@ -26,6 +26,7 @@
   ],
   "scripts": {
     "demo": "npm run build && node demo.mjs",
+    "demo-ts": "tsx demo.ts",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -36,12 +37,13 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "tsx": "^4.21.0"
   },
   "optionalDependencies": {
     "js-yaml": "^4.1.0"
   },
   "dependencies": {
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21"    
   }
 }

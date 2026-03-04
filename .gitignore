@@ -1,2 +1,5 @@
 node_modules/
 dist/
+
+sync-release.ps1
+sync-release.sh

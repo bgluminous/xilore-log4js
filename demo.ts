@@ -8,16 +8,41 @@ import {
   parseLevel,
 } from './dist/index.js';
 
+/**
+ * ⚠ 注意：为什么日志里的行号都是 demo.ts:1？
+ *
+ * 这个 demo 是通过 `tsx demo.ts`（或 ts-node 等运行时编译器）直接运行 TS 源码。
+ * 运行时会先把 `demo.ts` 编译成压缩后的 JS，这个 JS 通常被压成 1 行左右，
+ * 且当前示例没有开启 source map 反查 TS 源码行号。
+ *
+ * 因此 logger 在通过 Error.stack 解析调用位置时，看到的都是“编译后 JS 的第 1 行”，
+ * 再映射回文件名时就变成了统一的 `demo.ts:1`。这是运行方式导致的正常现象，不是 bug。
+ * 如需精确到 TS 源码行号，需要结合 source map + source-map-support 做额外解析。
+ */
+
+
 // ---------------------------------------------------------------------------
 // 1. 按字符串名称获取 logger
 // ---------------------------------------------------------------------------
 const log = getLogger('demo');
+log.warn(
+  `
+  ================================================
+
+  ⚠ 注意：demo.ts 通过 tsx/ts-node 运行时编译，
+  调用栈基于压缩后的 JS，第 1 行，
+  所以日志里的行号会统一显示为 demo.ts:1（不是 bug）。
+
+  ================================================
+  `,
+);
 log.info('Hello xilore-log4js');
 
 // ---------------------------------------------------------------------------
 // 2. 按类/构造函数获取 logger（名称为类名或 name）
 // ---------------------------------------------------------------------------
 class DemoService {}
+
 const serviceLog = getLogger(DemoService);
 serviceLog.info('Logger from class name:', DemoService.name);
 
@@ -54,7 +79,7 @@ console.log('parseLevel("invalid") =>', parseLevel('invalid'));
 // ---------------------------------------------------------------------------
 // 6. 程序化 setConfig：自定义配置（仅控制台、无颜色等）
 // ---------------------------------------------------------------------------
-const customProps = {
+const customProps: Record<string, string> = {
   path: '.',
   file_prefix: 'demo',
   date_format: 'yyyy-MM-dd HH:mm:ss.SSS',
@@ -82,6 +107,7 @@ const customProps = {
   'exclude.0.pattern': 'demo',
   'exclude.0.levels': 'debug,info',
 };
+
 setConfig(new XilLogPropertiesConfig(customProps));
 
 const configLog = getLogger('config-demo');
@@ -108,3 +134,4 @@ console.log('anonymousLog.getName() =>', anonymousLog.getName());
 // ---------------------------------------------------------------------------
 await shutdownIfPresent();
 console.log('shutdown 完成');
+
