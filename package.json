@@ -1,6 +1,6 @@
 {
   "name": "xilore-log4js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "轻量级 TypeScript/Node 日志库，控制台/文件/上传三种输出，支持 JSON/YAML 配置",
   "type": "module",
   "main": "dist/index.js",

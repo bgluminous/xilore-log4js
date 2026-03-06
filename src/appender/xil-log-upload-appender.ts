@@ -38,26 +38,33 @@ export class XilLogUploadAppender {
   private readonly uploadToken: string;
   private readonly queue: Array<XilLogEntity> = [];
   private running = true;
+  private drainScheduled = false;
 
   constructor(config: XilLogConfig) {
     this.uploadHost = config.getUploadHost()?.trim() ?? '';
     this.uploadToken = config.getUploadToken()?.trim() ?? '';
-    this.drainLoop();
   }
 
-  private drainLoop(): void {
-    const run = async () => {
-      const entity = this.queue.shift();
-      if (entity) {
-        await this.doUpload(entity);
-        setImmediate(run);
-        return;
-      }
-      if (this.running) {
-        setImmediate(run);
-      }
-    };
-    setImmediate(run);
+  private scheduleDrain(): void {
+    if (this.drainScheduled) {
+      return;
+    }
+    this.drainScheduled = true;
+    setImmediate(() => {
+      void this.drainLoop();
+    });
+  }
+
+  private async drainLoop(): Promise<void> {
+    this.drainScheduled = false;
+    const entity = this.queue.shift();
+    if (!entity) {
+      return;
+    }
+    await this.doUpload(entity);
+    if (this.queue.length > 0) {
+      this.scheduleDrain();
+    }
   }
 
   append(entity: XilLogEntity | null): void {
@@ -65,6 +72,7 @@ export class XilLogUploadAppender {
       return;
     }
     this.queue.push(entity);
+    this.scheduleDrain();
   }
 
   private async doUpload(entity: XilLogEntity): Promise<void> {

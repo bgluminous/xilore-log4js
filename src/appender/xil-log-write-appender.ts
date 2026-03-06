@@ -16,6 +16,7 @@ export class XilLogWriteAppender {
   private writtenSinceFlush = 0;
   private readonly queue: Array<() => void> = [];
   private running = true;
+  private drainScheduled = false;
   private readonly lock = { current: '' };
 
   constructor(config: XilLogConfig) {
@@ -23,26 +24,30 @@ export class XilLogWriteAppender {
     this.filePrefix = config.getFilePrefix();
     this.charset = (config.getCharset() || 'utf8') as BufferEncoding;
     this.flushInterval = Math.max(1, config.getWriteFlushInterval());
-    this.drainLoop();
+  }
+
+  private scheduleDrain(): void {
+    if (this.drainScheduled) {
+      return;
+    }
+    this.drainScheduled = true;
+    setImmediate(() => this.drainLoop());
   }
 
   private drainLoop(): void {
-    const run = () => {
-      const task = this.queue.shift();
-      if (task) {
-        try {
-          task();
-        } catch {
-          // ignore
-        }
-        setImmediate(run);
-        return;
-      }
-      if (this.running) {
-        setImmediate(run);
-      }
-    };
-    setImmediate(run);
+    this.drainScheduled = false;
+    const task = this.queue.shift();
+    if (!task) {
+      return;
+    }
+    try {
+      task();
+    } catch {
+      // ignore
+    }
+    if (this.queue.length > 0) {
+      this.scheduleDrain();
+    }
   }
 
   append(entity: XilLogEntity | null): void {
@@ -50,6 +55,7 @@ export class XilLogWriteAppender {
       return;
     }
     this.queue.push(() => this.doAppend(entity));
+    this.scheduleDrain();
   }
 
   private doAppend(entity: XilLogEntity): void {
